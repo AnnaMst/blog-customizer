@@ -21,7 +21,7 @@ export const Article = ({
 }: ArticleProps) => {
   return (
     <article
-      className={clsx(styles.article)}
+      className='styles.article'
       style={{
         color: fontColor.value,
         fontFamily: fontFamily.value,
