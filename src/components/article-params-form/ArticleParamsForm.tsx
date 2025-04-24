@@ -13,12 +13,12 @@ import clsx from 'clsx';
 type Props = {
 	initialState: typeof defaultArticleState;
 	onApply: (styles: typeof defaultArticleState) => void;
-	onReset: () => void;
-  };
+	onReset: () => void
+};
   
-  export const ArticleParamsForm = ({ initialState, onApply, onReset }: Props) => {
+export const ArticleParamsForm = ({ initialState, onApply, onReset }: Props) => {
 	const [isMenuOpen, setIsMenuOpen] = useState(false);
-  
+
 	const [selectedColor, setSelectedColor] = useState(initialState.fontColor);
 	const [selectedFont, setSelectedFont] = useState(initialState.fontFamilyOption);
 	const [selectedFontSize, setSelectedFontSize] = useState(initialState.fontSizeOption);
@@ -27,6 +27,16 @@ type Props = {
 
 	const sidebarRef = useRef<HTMLDivElement>(null);
 
+	// 🟡 Обновляем значения, когда initialState меняется (после "Применить")
+	useEffect(() => {
+		setSelectedColor(initialState.fontColor);
+		setSelectedFont(initialState.fontFamilyOption);
+		setSelectedFontSize(initialState.fontSizeOption);
+		setSelectedBackground(initialState.backgroundColor);
+		setSelectedWidth(initialState.contentWidth);
+	}, [initialState]);
+
+	// Закрытие меню при клике вне
 	useEffect(() => {
 		const handleClickOutside = (event: MouseEvent) => {
 			if (sidebarRef.current && !sidebarRef.current.contains(event.target as Node)) {
@@ -42,91 +52,83 @@ type Props = {
 			document.removeEventListener('mousedown', handleClickOutside);
 		};
 	}, [isMenuOpen]);
-  
+
 	const handleSubmitClick = (e: React.FormEvent) => {
-	  e.preventDefault();
-	  onApply({
-		fontColor: selectedColor,
-		fontFamilyOption: selectedFont,
-		fontSizeOption: selectedFontSize,
-		backgroundColor: selectedBackground,
-		contentWidth: selectedWidth,
-	  });
+		e.preventDefault();
+		onApply({
+			fontColor: selectedColor,
+			fontFamilyOption: selectedFont,
+			fontSizeOption: selectedFontSize,
+			backgroundColor: selectedBackground,
+			contentWidth: selectedWidth,
+		});
 	};
-  
+
 	const handleResetClick = () => {
-	  setSelectedColor(initialState.fontColor);
-	  setSelectedFont(initialState.fontFamilyOption);
-	  setSelectedFontSize(initialState.fontSizeOption);
-	  setSelectedBackground(initialState.backgroundColor);
-	  setSelectedWidth(initialState.contentWidth);
-	  onReset();
+		setSelectedColor(initialState.fontColor);
+		setSelectedFont(initialState.fontFamilyOption);
+		setSelectedFontSize(initialState.fontSizeOption);
+		setSelectedBackground(initialState.backgroundColor);
+		setSelectedWidth(initialState.contentWidth);
+
+		onReset();
 	};
-  
+
 	return (
-	  <>
-		<ArrowButton isOpen={isMenuOpen} onClick={() => setIsMenuOpen(prev => !prev)} />
-		<aside ref={sidebarRef} className={clsx(styles.container, {[styles.container_open]: isMenuOpen})}>
-		  <form className={styles.form} onSubmit={handleSubmitClick}>
-			<Text
-				children='задайте параметры'
-				as='h2'
-				size= {31}
-				weight={800}
-				fontStyle='normal'
-				uppercase={true}
-			/>
-			<ul>
-				<Select
-					options={fontFamilyOptions}
-					selected={selectedFont}
-					title='шрифт'
-					onChange={setSelectedFont}
-						
-				/>
-			</ul>
-			<ul>
-				<RadioGroup
-					name=''
-					options={fontSizeOptions}
-					selected={selectedFontSize}
-					onChange={setSelectedFontSize}
-					title='размер шрифта'
-				/>
-			</ul>
-			<ul>
-				<Select
-					options={fontColors}
-					selected={selectedColor}
-					title='выберите цвет'
-					onChange={setSelectedColor}
-						
-				/>
-			</ul>
-			<Separator
-			/>
-			<ul>
-				<Select
-					options={backgroundColors}
-					selected={selectedBackground}
-					title='цвет фона'
-					onChange={setSelectedBackground}					
-				/>
-			</ul>
-			<ul>
-				<Select
-					options={contentWidthArr}
-					selected={selectedWidth}
-					title='ширина контента'
-					onChange={setSelectedWidth}	
-				/>
-			</ul>
-          	<div className={styles.bottomContainer}>
-            	<Button title='Сбросить' htmlType='button' type='clear' onClick={handleResetClick} />
-            	<Button title='Применить' htmlType='submit' type='apply' />
-          	</div>
-        </form>
-      </aside>
-    </>
-  );
+		<>
+			<ArrowButton isOpen={isMenuOpen} onClick={() => setIsMenuOpen(prev => !prev)} />
+			<aside
+				ref={sidebarRef}
+				className={clsx(styles.container, {
+					[styles.container_open]: isMenuOpen,
+				})}>
+				<form className={styles.form} onSubmit={handleSubmitClick}>
+					<Text
+						children='задайте параметры'
+						as='h2'
+						size={31}
+						weight={800}
+						fontStyle='normal'
+						uppercase={true}
+					/>
+					<Select
+						options={fontFamilyOptions}
+						selected={selectedFont}
+						title='шрифт'
+						onChange={setSelectedFont}
+					/>
+					<RadioGroup
+						name=''
+						options={fontSizeOptions}
+						selected={selectedFontSize}
+						onChange={setSelectedFontSize}
+						title='размер шрифта'
+					/>
+					<Select
+						options={fontColors}
+						selected={selectedColor}
+						title='выберите цвет'
+						onChange={setSelectedColor}
+					/>
+					<Separator />
+					<Select
+						options={backgroundColors}
+						selected={selectedBackground}
+						title='цвет фона'
+						onChange={setSelectedBackground}
+					/>
+					<Select
+						options={contentWidthArr}
+						selected={selectedWidth}
+						title='ширина контента'
+						onChange={setSelectedWidth}
+					/>
+					<div className={styles.bottomContainer}>
+						<Button title='Сбросить' htmlType='button' type='clear' onClick={handleResetClick} />
+						<Button title='Применить' htmlType='submit' type='apply' />
+					</div>
+				</form>
+			</aside>
+		</>
+	);
 };
