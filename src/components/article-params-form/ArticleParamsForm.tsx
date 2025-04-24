@@ -2,15 +2,129 @@ import { ArrowButton } from 'src/ui/arrow-button';
 import { Button } from 'src/ui/button';
 
 import styles from './ArticleParamsForm.module.scss';
+import { fontColors, fontFamilyOptions, fontSizeOptions, defaultArticleState, backgroundColors, contentWidthArr } from 'src/constants/articleProps';
+import { useEffect, useRef, useState } from 'react';
+import { Select } from 'src/ui/select';
+import { RadioGroup } from 'src/ui/radio-group';
+import { Separator } from 'src/ui/separator';
+import { Text } from 'src/ui/text'
+import clsx from 'clsx';
 
-export const ArticleParamsForm = () => {
+type Props = {
+	initialState: typeof defaultArticleState;
+	onApply: (styles: typeof defaultArticleState) => void;
+	onReset: () => void
+};
+  
+export const ArticleParamsForm = ({ initialState, onApply, onReset }: Props) => {
+	const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+	const [selectedColor, setSelectedColor] = useState(initialState.fontColor);
+	const [selectedFont, setSelectedFont] = useState(initialState.fontFamilyOption);
+	const [selectedFontSize, setSelectedFontSize] = useState(initialState.fontSizeOption);
+	const [selectedBackground, setSelectedBackground] = useState(initialState.backgroundColor);
+	const [selectedWidth, setSelectedWidth] = useState(initialState.contentWidth);
+
+	const sidebarRef = useRef<HTMLDivElement>(null);
+
+	// 🟡 Обновляем значения, когда initialState меняется (после "Применить")
+	useEffect(() => {
+		setSelectedColor(initialState.fontColor);
+		setSelectedFont(initialState.fontFamilyOption);
+		setSelectedFontSize(initialState.fontSizeOption);
+		setSelectedBackground(initialState.backgroundColor);
+		setSelectedWidth(initialState.contentWidth);
+	}, [initialState]);
+
+	// Закрытие меню при клике вне
+	useEffect(() => {
+		const handleClickOutside = (event: MouseEvent) => {
+			if (sidebarRef.current && !sidebarRef.current.contains(event.target as Node)) {
+				setIsMenuOpen(false);
+			}
+		};
+
+		if (isMenuOpen) {
+			document.addEventListener('mousedown', handleClickOutside);
+		}
+
+		return () => {
+			document.removeEventListener('mousedown', handleClickOutside);
+		};
+	}, [isMenuOpen]);
+
+	const handleSubmitClick = (e: React.FormEvent) => {
+		e.preventDefault();
+		onApply({
+			fontColor: selectedColor,
+			fontFamilyOption: selectedFont,
+			fontSizeOption: selectedFontSize,
+			backgroundColor: selectedBackground,
+			contentWidth: selectedWidth,
+		});
+	};
+
+	const handleResetClick = () => {
+		setSelectedColor(initialState.fontColor);
+		setSelectedFont(initialState.fontFamilyOption);
+		setSelectedFontSize(initialState.fontSizeOption);
+		setSelectedBackground(initialState.backgroundColor);
+		setSelectedWidth(initialState.contentWidth);
+
+		onReset();
+	};
+
 	return (
 		<>
-			<ArrowButton isOpen={false} onClick={() => {}} />
-			<aside className={styles.container}>
-				<form className={styles.form}>
+			<ArrowButton isOpen={isMenuOpen} onClick={() => setIsMenuOpen(prev => !prev)} />
+			<aside
+				ref={sidebarRef}
+				className={clsx(styles.container, {
+					[styles.container_open]: isMenuOpen,
+				})}>
+				<form className={styles.form} onSubmit={handleSubmitClick}>
+					<Text
+						children='задайте параметры'
+						as='h2'
+						size={31}
+						weight={800}
+						fontStyle='normal'
+						uppercase={true}
+					/>
+					<Select
+						options={fontFamilyOptions}
+						selected={selectedFont}
+						title='шрифт'
+						onChange={setSelectedFont}
+					/>
+					<RadioGroup
+						name=''
+						options={fontSizeOptions}
+						selected={selectedFontSize}
+						onChange={setSelectedFontSize}
+						title='размер шрифта'
+					/>
+					<Select
+						options={fontColors}
+						selected={selectedColor}
+						title='выберите цвет'
+						onChange={setSelectedColor}
+					/>
+					<Separator />
+					<Select
+						options={backgroundColors}
+						selected={selectedBackground}
+						title='цвет фона'
+						onChange={setSelectedBackground}
+					/>
+					<Select
+						options={contentWidthArr}
+						selected={selectedWidth}
+						title='ширина контента'
+						onChange={setSelectedWidth}
+					/>
 					<div className={styles.bottomContainer}>
-						<Button title='Сбросить' htmlType='reset' type='clear' />
+						<Button title='Сбросить' htmlType='button' type='clear' onClick={handleResetClick} />
 						<Button title='Применить' htmlType='submit' type='apply' />
 					</div>
 				</form>
